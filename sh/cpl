@@ -1,0 +1,42 @@
+#!/bin/bash
+
+EXDIR="$(dirname $(readlink -f $0))"	# The directory containing this file.
+EXCEPT="ctr.cpp"						# The file does not need compilation.
+SRCE="fnt_srce"							# Source directory.
+EX="fnt"								# Executable directory.
+
+# Check for existence of source directory
+if ! [ -d "$EXDIR/$SRCE" ]; then
+	echo "$EXDIR/$SRCE: No such directory."
+	exit 0
+fi
+
+# Create executable direcotry if it doesn't exists.
+if ! [ -d "$EXDIR/$EX" ]; then
+	mkdir $EXDIR/$EX
+fi
+
+# For command: cpl
+# Compile all files in source directory.
+if [ -z $1 ]; then
+	for i in `find $EXDIR/$SRCE/ -name '*.cpp'`; do 
+		if [[ "$i" != *"$EXCEPT"* ]]; then
+			basename=${i##*/}
+			filename=${basename%%.*}
+			echo $basename
+			g++ -o $EXDIR/$EX/$filename $i
+		fi
+	done
+	exit 0
+fi
+
+# For command: cpl <FILE NAME> .. [FILE NAME]
+# Compile the required files in the source directory.
+for i in $*; do
+	if [ -f "$EXDIR/$SRCE/$i.cpp" ]; then
+		echo "$i.cpp"
+		g++ -o $EXDIR/$EX/$i $EXDIR/$SRCE/$i.cpp
+	else
+		echo "$i.cpp: No such file"
+	fi
+done

@@ -1,0 +1,177 @@
+#!/bin/bash
+
+EXDIR="$(dirname $(readlink -f $0))"	# The directory containing this file
+DWS="dyws"								# Dynamic workspace dicrectory
+
+# Error.
+CWR="This command is wrong."
+NSFD="No such file or directory."
+
+# Create dynamic workspace dicrectory if it doesn't exists.
+if ! [ -d "$EXDIR/$DWS" ]; then
+	mkdir $EXDIR/$DWS
+fi
+
+# Check arguments exist.
+if [ -z $1 ]; then
+	printf "%-6s %s\n%-5s  %s\n" "new" "<FILE> .. [FILE]" "" "Create new cpp files."
+	printf "%-6s %s\n%-5s  %s\n" "rm" "<FILE> .. [FILE]" "" "Delete cpp files."
+	printf "%-6s %s\n%-5s  %s\n" "op" "<FILE> .. [FILE]" "" "Open cpp files with xed."
+	printf "%-6s %s\n%-5s  %s\n" "run" "<FILE>" "" "Compile and run a cpp file."
+	printf "%-6s %s\n" "ls" "Show cpp file list."
+	printf "%-6s %s\n" "expp" "Export execution path to PATH."
+	printf "%-6s %s\n" "ws" "Open dynamic workspace dicrectory with nemo."
+	printf "%-6s %s\n" "help" "Show all helps."
+	exit 0
+fi
+
+# For command: pws new <FILE NAME>
+# Create a new cpp file.
+if [ $1 == "new" ]; then
+	if [ -z $2 ] || [ $# -gt 2 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	if [ -f $EXDIR/$DWS/$2.cpp ]; then
+		ANSWER=
+		while true; do
+			echo -e "File already exists. Do you want to overwrite it? (y | n) \c"
+			read ANSWER
+			if [ -z $ANSWER ]; then
+				continue
+			elif [ $ANSWER == "y" ]; then
+				break
+			elif [ $ANSWER == "n" ]; then
+				exit 0
+			else
+				continue
+			fi
+		done
+	fi
+	
+	touch $EXDIR/$DWS/$2.cpp
+	echo -e "#include <iostream>\n\n#define show(x) std::cout << x << std::endl;\n\nint main(int args, char **argv) {\n\t\n\treturn 0;\n}" > $EXDIR/$DWS/$2.cpp
+	
+# For command: pws rm <FILE NAME>
+# Remove a cpp file.
+elif [ $1 == "rm" ]; then
+	if [ $2 == "." ] && [ $# -eq 2 ]; then
+		rm $EXDIR/$DWS/*.cpp
+		exit 0
+	fi
+	
+	for i in ${@:2}; do
+		if ! [ -f $EXDIR/$DWS/$i.cpp ]; then
+			echo $EXDIR/$DWS/$i.cpp: $NSFD
+			continue
+		fi
+	
+		rm $EXDIR/$DWS/$i.cpp
+	done
+
+# For command: pws op <FILE NAME>
+elif [ $1 == "op" ]; then
+	if [ $2 == "." ] && [ $# -eq 2 ]; then
+		xed $EXDIR/$DWS/*.cpp
+		exit 0
+	fi
+	
+	for i in ${@:2}; do
+		if ! [ -f $EXDIR/$DWS/$i.cpp ]; then
+			echo $EXDIR/$DWS/$i.cpp: $NSFD
+			continue
+		fi
+	
+		xed $EXDIR/$DWS/$i.cpp
+	done
+
+# For command: pws run <FILE NAME>
+# Compile and run a cpp file.
+elif [ $1 == "run" ]; then
+	if [ -z $2 ] || [ $# -gt 2 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	if ! [ -f $EXDIR/$DWS/$2.cpp ]; then
+		echo $EXDIR/$DWS/$2.cpp: $NSFD
+		exit 0
+	fi
+	
+	g++ -o $EXDIR/$DWS/$2 $EXDIR/$DWS/$2.cpp
+	$EXDIR/$DWS/$2
+	rm $EXDIR/$DWS/$2
+	
+# for command: pws ls
+# Show list cpp file.
+elif [ $1 == "ls" ]; then
+	if [ $# -gt 2 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	for i in `find $EXDIR/$DWS/ -name '*.cpp'`; do
+		basename=${i##*/}
+		filename=${basename%%.*}
+		echo $filename
+	done
+	
+# For command: pws expp
+# Export execution path to PATH
+elif [ $1 == "expp" ]; then
+	if [ $# -gt 1 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	export PATH="$EXDIR:$PATH"
+	exec $SHELL
+	
+# For command: dws ws
+# Open dynamic workspace dicrectory with 'nemo'
+elif [ $1 == "ws" ]; then
+	if [ $# -gt 1 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	nemo $EXDIR/$DWS
+	
+# For command: dws help
+# Show all helps.
+elif [ $1 == "help" ]; then
+	if [ $# -gt 1 ]; then
+		echo $CWR
+		exit 0
+	fi
+	
+	printf "%-6s %s\n%-5s  %s\n" "new" "<FILE> .. [FILE]" "" "Create new cpp files."
+	printf "%-6s %s\n%-5s  %s\n" "rm" "<FILE> .. [FILE]" "" "Delete cpp files."
+	printf "%-6s %s\n%-5s  %s\n" "op" "<FILE> .. [FILE]" "" "Open cpp files with xed."
+	printf "%-6s %s\n%-5s  %s\n" "run" "<FILE>" "" "Compile and run a cpp file."
+	printf "%-6s %s\n" "ls" "Show cpp file list."
+	printf "%-6s %s\n" "expp" "Export execution path to PATH."
+	printf "%-6s %s\n" "ws" "Open dynamic workspace dicrectory with nemo."
+	printf "%-6s %s\n" "help" "Show all helps."
+	
+# Shortcut commands
+# Commands:
+#     dws <FILE NAME>: Create a new cpp file and opening it with 'xed' if it doesn't not exists.
+#					   Run and complie a cpp file if it exists.
+else
+	if [ -f $EXDIR/$DWS/$1.cpp ]; then
+		g++ -o $EXDIR/$DWS/$1 $EXDIR/$DWS/$1.cpp
+		$EXDIR/$DWS/$1 ${@:2}
+		rm $EXDIR/$DWS/$1
+	else
+		if [ $# -gt 1 ]; then
+			echo $CWR
+			exit 0
+		fi
+	
+		touch $EXDIR/$DWS/$1.cpp
+		echo -e "#include <iostream>\n\n#define show(x) std::cout << x << std::endl;\n\nint main(int args, char **argv) {\n\t\n\treturn 0;\n}" > $EXDIR/$DWS/$1.cpp
+		xed $EXDIR/$DWS/$1.cpp
+	fi
+fi

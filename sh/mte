@@ -1,0 +1,43 @@
+#!/bin/bash
+
+CWR="This command is wrong."
+EXDIR="$(dirname $(readlink -f $0))"
+
+if [ -z $1 ]
+then
+	echo "combine   <OUTPUT FILE> [FILE | DIRECTORY] .. [FILE | DIRECTORY]"
+    echo "          Combine files and folders into a single file."
+    echo "separate  <INPUT FILE> [OUTPUT DIRECTORY]"
+    echo "          Separates a merged file into the original files and folders."
+    echo "split     <INPUT FILE> [OUTPUT DIRECTORY]"
+    echo "          Split a file into multiple sub files."
+    echo "merge     <INPUT FILE 000.bin> [OUTPUT DIRECTORY]"
+    echo "          Merge split files."
+elif [ $1 == "combine" ]
+then
+	$EXDIR/fnt/cbn ${@:2}
+elif [ $1 == "seperate" ]
+then
+	$EXDIR/fnt/spr ${@:2}
+elif [ $1 == "split" ]
+then
+	$EXDIR/fnt/spl ${@:2}
+elif [ $1 == "merge" ]
+then
+	$EXDIR/fnt/mge ${@:2}
+elif [ $1 == "c" ]
+then
+	$EXDIR/cpl ${@:2}
+elif [ $1 == "help"  ]
+then
+    echo "combine   <OUTPUT FILE> [FILE | DIRECTORY] .. [FILE | DIRECTORY]"
+    echo "          Combine files and folders into a single file."
+    echo "separate  <INPUT FILE> [OUTPUT DIRECTORY]"
+    echo "          Separates a merged file into the original files and folders."
+    echo "split     <INPUT FILE> [OUTPUT DIRECTORY]"
+    echo "          Split a file into multiple sub files."
+    echo "merge     <INPUT FILE 000.bin> [OUTPUT DIRECTORY]"
+    echo "          Merge split files."
+else
+	echo $CWR
+fi
