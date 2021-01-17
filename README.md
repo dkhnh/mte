@@ -2,7 +2,7 @@
 A little exercise for the binary file section using c/c ++
 #### How to use it?
 <pre>
-1. Copy or cut the 'mte' file in the bat or sh folder out to the same level as fnt_source.
+1. Copy or cut all files in the bat or sh folder out to the same level as fnt_source.
 2. Run 'cpl'
 3. Run 'mte help', you can see a list of commands.
 </pre>
