@@ -1,5 +1,5 @@
 # mte
-A little exercise for the binary file section using c/c ++
+A little exercise for the binary file section using c/c ++.
 #### How to use it?
 <pre>
 1. Copy or cut all files in the bat or sh folder out to the same level as fnt_source.
